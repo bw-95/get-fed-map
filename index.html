@@ -687,21 +687,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .marker-cluster span{line-height:30px}
 /* Layout: one-screen app. Map fills the screen; a panel (right on desktop, bottom sheet on phone) holds filters, nearby list and details. */
 :root{
-  --bg:#f3f5f1; --surface:#ffffff; --ink:#18211c; --muted:#5e6b63; --line:#dde3dc;
-  --accent:#1d7a4c; --accent-ink:#ffffff; --you:#2563eb; --land:#e9ede4; --land-line:#c9d2c4; --water:#d6e4ea; --other-land:#e2e3dc;
+  /* Brand colours: change these to restyle the whole page. */
+  --brand:#ffc61a; --brand-ink:#1b1410; --brand-dark:#1b1410; --hot:#e8412c; --halal:#1d7a4c;
+  --bg:#fff7e8; --surface:#ffffff; --ink:#1b1410; --muted:#6e6157; --line:#efe3cf;
+  --accent:var(--brand); --accent-ink:var(--brand-ink); --you:#2563eb; --land:#f6efe0; --land-line:#e2d5bd; --water:#d4e6ec; --other-land:#efe9dc;
   --s1:#d9480f; --s2:#c2255c; --s3:#1d7a4c; --s4:#1971c2; --s5:#7048e8; --s6:#b08900;
   --display:"Bricolage Grotesque", "Inter", system-ui, sans-serif;
   --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow:0 6px 24px rgba(20,30,25,.14);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111613; --surface:#18201b; --ink:#e8eee9; --muted:#9aa89f; --line:#2b362f;
-  --accent:#4fbf86; --accent-ink:#0c1410; --you:#60a5fa; --land:#1d2620; --land-line:#33413a; --water:#0e1a1f; --other-land:#1a1f1c;
+  --bg:#15110d; --surface:#1f1a15; --ink:#f6eee3; --muted:#b0a395; --line:#352c23; --hot:#ff6a52; --halal:#4fbf86;
+  --accent:var(--brand); --accent-ink:var(--brand-ink); --you:#60a5fa; --land:#241e18; --land-line:#3a3027; --water:#101a1e; --other-land:#1d1915;
   --s1:#ff8a4c; --s2:#f06595; --s3:#4fbf86; --s4:#5aa9f0; --s5:#9f87ff; --s6:#e0b93a;
   --shadow:0 6px 24px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111613; --surface:#18201b; --ink:#e8eee9; --muted:#9aa89f; --line:#2b362f;
-  --accent:#4fbf86; --accent-ink:#0c1410; --you:#60a5fa; --land:#1d2620; --land-line:#33413a; --water:#0e1a1f; --other-land:#1a1f1c;
+  --bg:#15110d; --surface:#1f1a15; --ink:#f6eee3; --muted:#b0a395; --line:#352c23; --hot:#ff6a52; --halal:#4fbf86;
+  --accent:var(--brand); --accent-ink:var(--brand-ink); --you:#60a5fa; --land:#241e18; --land-line:#3a3027; --water:#101a1e; --other-land:#1d1915;
   --s1:#ff8a4c; --s2:#f06595; --s3:#4fbf86; --s4:#5aa9f0; --s5:#9f87ff; --s6:#e0b93a;
   --shadow:0 6px 24px rgba(0,0,0,.5); color-scheme:dark}
 html,body{height:100%}
@@ -723,7 +725,7 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .chip .dot{width:8px;height:8px;border-radius:50%}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .row select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:12px;max-width:100%}
 .locbar{display:flex;flex-direction:column;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line)}
@@ -734,14 +736,14 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .radius{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
 .list{overflow:auto;flex:1;min-height:0}
 .listhead{position:sticky;top:0;background:var(--surface);padding:8px 16px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);z-index:1}
-.item{display:grid;grid-template-columns:10px 1fr auto;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer;align-items:start;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left}
+.item{display:grid;grid-template-columns:32px 1fr auto;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer;align-items:start;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left}
 .item:hover,.item.on{background:var(--bg)}
-.item .dot{width:10px;height:10px;border-radius:50%;margin-top:4px}
+
 .item .nm{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .item .sub{color:var(--muted);font-size:12px;margin-top:2px;overflow-wrap:anywhere}
 .item .dist{font-variant-numeric:tabular-nums;font-size:12px;color:var(--muted);white-space:nowrap}
 .tag{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:4px;border:1px solid var(--line);margin-left:4px;vertical-align:1px}
-.tag.halal{border-color:var(--accent);color:var(--accent)}
+.tag.halal{border-color:var(--halal);color:var(--halal)}
 .detail{position:absolute;z-index:1000;top:12px;left:12px;width:min(360px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
 .detail h2{font-family:var(--display);font-weight:800;font-size:20px;margin:0;line-height:1.15;text-wrap:balance;padding-right:30px}
 .detail .close{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:16px;line-height:1}
@@ -753,11 +755,17 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
 .links a{font-size:12.5px;font-weight:600;text-decoration:none;padding:7px 10px;border-radius:9px;border:1px solid var(--line);color:var(--ink)}
 .links a.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .note{font-size:11.5px;color:var(--muted)}
-.pin{width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.35)}
-.pin.sel{outline:3px solid var(--ink)}
+/* food icon badge: emoji (or the logo) in a circle ringed with the season colour */
+.fi{width:32px;height:32px;border-radius:50%;background:var(--surface);border:2.5px solid var(--ring,var(--brand));display:grid;place-items:center;font-size:17px;line-height:1;overflow:hidden;flex:none}
+.fi img{width:100%;height:100%;object-fit:cover;display:block}
+.mk{position:relative;width:34px;height:42px;transform-origin:50% 100%;transition:transform .15s}
+.mk .fi{width:34px;height:34px;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.mk:after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--ring)}
+.mk.sel{transform:scale(1.3);z-index:1}
+.mk.sel .fi{box-shadow:0 0 0 3px var(--brand),0 3px 10px rgba(0,0,0,.35)}
 .you{width:18px;height:18px;border-radius:50%;background:var(--you);border:3px solid #fff;box-shadow:0 0 0 6px color-mix(in srgb,var(--you) 30%,transparent)}
-.marker-cluster{background:color-mix(in srgb,var(--ink) 18%,transparent)!important}
-.marker-cluster div{background:var(--ink)!important;color:var(--surface)!important;font-weight:600;font-family:var(--body)}
+.marker-cluster{background:color-mix(in srgb,var(--brand) 40%,transparent)!important}
+.marker-cluster div{background:var(--brand)!important;color:var(--brand-ink)!important;font-weight:800;font-family:var(--body);box-shadow:0 0 0 2px var(--brand-dark)}
 .leaflet-tooltip{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:8px;padding:6px 9px;font-size:12px}
 .leaflet-tooltip b{display:block;font-size:13px}
 .leaflet-tooltip-top:before{border-top-color:var(--surface)}
@@ -779,6 +787,22 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
   .detail{top:auto;bottom:12px;left:max(12px,env(safe-area-inset-left,0px));max-height:70%}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.masthead{background:var(--brand-dark);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:4px solid var(--brand)}
+.masthead .logo{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#fff;flex:none}
+.masthead h1{color:var(--brand);text-transform:uppercase;letter-spacing:.01em;flex:1;min-width:0;font-size:20px;line-height:1.1}
+.masthead .count{color:rgba(255,255,255,.7)}
+.btn{font-weight:700}
+.dishline{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.photos{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px}
+.detail>*{flex-shrink:0}
+.photos:empty{display:none}
+.ph{position:relative;flex:0 0 86%;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:var(--bg);scroll-snap-align:start;margin:0;display:block;color:#fff;text-decoration:none}
+.ph:only-child{flex-basis:100%}
+.ph[hidden]{display:none}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .cap{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 7px;font-size:11.5px;font-weight:600;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.ph .cap a{color:#fff}
+.ph .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:var(--hot);display:grid;place-items:center;font-size:18px;padding-left:3px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
 .tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
 </style>
 
@@ -788,11 +812,12 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
     <article class="detail" id="detail" hidden></article>
   </div>
   <aside class="panel" id="panel">
+    <div class="masthead">
+      <img class="logo" id="logo" alt="" hidden>
+      <h1>Get Fed Food Map</h1>
+      <span class="count" id="count"></span>
+    </div>
     <div class="head">
-      <div class="brand">
-        <h1>Get Fed Food Map</h1>
-        <span class="count" id="count"></span>
-      </div>
       <div class="search">
         <input id="q" type="search" placeholder="Search name, dish, area, episode" aria-label="Search">
         <button class="btn ghost" id="toggle" type="button" aria-label="Show or hide filters">Filters</button>
@@ -802,6 +827,7 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
         <div class="row">
           <button class="chip" id="halal" type="button" aria-pressed="false">Halal / Muslim-owned only</button>
           <select id="cat" aria-label="Cuisine"></select>
+          <select id="dish" aria-label="Dish"></select>
         </div>
       </div>
     </div>
@@ -896,9 +922,99 @@ const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const isHalal=r=>/YES|MUSLIM/.test(r.halal)||/halal|muslim/i.test(r.category);
 const catOf=r=>(r.category||"Other").split("\n")[0].replace(/^Viet$/,"Vietnamese").trim()||"Other";
-DATA.forEach((r,i)=>{r.id=i;r.cat=catOf(r);r.isHalal=isHalal(r)});
+// ---- dish types: the first rule whose pattern matches the stall name wins; [pattern, icon, label, Wikipedia search for a photo]
+const DISHES=[
+  [/carrot cake|chai tow/,"🍳","Carrot cake","Chai tow kway"],
+  [/oyster omelette|orh luak/,"🍳","Oyster omelette","Oyster omelette"],
+  [/curry puff|what the puff/,"🥟","Curry puff","Curry puff"],
+  [/laksa/,"🍜","Laksa","Laksa"],
+  [/hokkien.*(mee|noodle)|hokkien prawn|fried hokkien/,"🍜","Hokkien mee","Hokkien mee"],
+  [/prawn (noodle|mee)|prawn & mee|prawn mee|hae mee/,"🍤","Prawn noodles","Hae mee prawn noodle soup"],
+  [/wan ?ton|wonton|云吞/,"🍜","Wanton mee","Wonton noodles"],
+  [/minced meat|bak ?chor/,"🍜","Bak chor mee","Bak chor mee"],
+  [/kway teow|kueh teow|kway tiao|粿条/,"🍜","Char kway teow","Char kway teow"],
+  [/hor fun/,"🍜","Hor fun","Shahe fen"],
+  [/cheong fun/,"🥟","Chee cheong fun","Rice noodle roll"],
+  [/lor mee/,"🍜","Lor mee","Lor mee"],
+  [/pan mee|ban mian|mian fen guo|hakka noodle/,"🍜","Ban mian","Pan mee"],
+  [/ramen/,"🍜","Ramen","Ramen"],
+  [/udon/,"🍜","Udon","Udon"],
+  [/\bpho\b|beef noodle|hock lam beef/,"🍜","Beef noodles","Pho"],
+  [/fish head steamboat|steamboat|hotpot|hot pot|mookata|chuan chuan|ji gong bao/,"🍲","Hotpot","Hot pot"],
+  [/chicken rice|chee pow kai|soy sauce chicken|boon tong kee/,"🍗","Chicken rice","Hainanese chicken rice"],
+  [/la mian|xiao long bao|dumpling|jiaozi/,"🥟","Dumplings","Xiaolongbao"],
+  [/\bpau\b|\bbao\b|shui jing pau/,"🥟","Bao","Baozi"],
+  [/noodle|\bmee\b|mian\b|bee hoon|vermicelli|kolo/,"🍜","Noodles","Chinese noodles"],
+  [/duck/,"🦆","Duck rice","Braised duck rice"],
+  [/bak kut teh|pork ribs soup|song fa/,"🍲","Bak kut teh","Bak kut teh"],
+  [/curry fish|fish head curry/,"🍛","Fish head curry","Fish head curry"],
+  [/claypot/,"🍲","Claypot rice","Claypot rice"],
+  [/nasi lemak/,"🍛","Nasi lemak","Nasi lemak"],
+  [/briyani|biryani/,"🍛","Biryani","Biryani"],
+  [/butter chicken|tandoor/,"🍛","Indian","Butter chicken"],
+  [/curry/,"🍛","Curry rice","Hainanese curry rice"],
+  [/porridge|congee|poached rice/,"🥣","Porridge","Teochew porridge"],
+  [/kway chap/,"🥣","Kway chap","Kway chap"],
+  [/mixed (veg )?rice|economic|rice stall|steam rice/,"🍱","Economy rice","Economy rice"],
+  [/fried rice/,"🍚","Fried rice","Fried rice"],
+  [/fish soup|seafood soup|herbal|organ soup|mutton soup|tom ?yum|sauerkraut|soup/,"🍲","Soup","Fish soup bee hoon"],
+  [/tofu|yong tau foo/,"🍲","Yong tau foo","Yong tau foo"],
+  [/zi ?char|tze ?char/,"🥘","Zi char","Zi char"],
+  [/hunan|si ?chuan|sichuan|mala\b/,"🌶️","Sichuan & Hunan","Sichuan cuisine"],
+  [/nyonya|nonya|peranakan/,"🍛","Peranakan","Peranakan cuisine"],
+  [/penang/,"🍜","Penang food","Penang cuisine"],
+  [/pretzel|auntie anne/,"🥨","Pretzels","Pretzel"],
+  [/bbq fish|bbq seafood|b\.b\.q seafood/,"🐟","BBQ seafood","Ikan bakar"],
+  [/crab|claw/,"🦀","Crab","Chilli crab"],
+  [/sushi|raw\b|tanuki/,"🍣","Sushi","Sushi"],
+  [/yakiniku|bulgogi|korean bbq|gogi/,"🥩","Korean & Japanese BBQ","Yakiniku"],
+  [/burger/,"🍔","Burger","Hamburger"],
+  [/pizza/,"🍕","Pizza","Neapolitan pizza"],
+  [/pasta|bottega|enoteca/,"🍝","Pasta","Pasta"],
+  [/taco|tamale|birria|comida|mexican/,"🌮","Mexican","Taco"],
+  [/banh ?mi|bánh mì|banhi mi/,"🥖","Bánh mì","Bánh mì"],
+  [/sandwich|wrapp/,"🥪","Sandwiches","Sandwich"],
+  [/bagel/,"🥯","Bagels","Bagel"],
+  [/pancake/,"🥞","Pancakes","Pancake"],
+  [/croissant|kroissant|bakery|pain\b|levain|sourdough|pastry|bread/,"🥐","Bakery","Croissant"],
+  [/cake|creme|crème|swirl|dessert/,"🍰","Dessert","Cake"],
+  [/lechon/,"🐖","Lechon","Lechon"],
+  [/roast|char si(e|u)w?|bbq pork|barbeque pork|siew|roaster/,"🍖","Roast meat","Char siu"],
+  [/steak|wagyu|gyu|hamburg|cut\b|sear|grill|carna|\bbbq\b|b\.b\.q|barbeque|charcoal/,"🥩","Steak & grill","Steak"],
+  [/katsu|cutlet/,"🍱","Katsu","Tonkatsu"],
+  [/wings|fried chicken|chicken|bebek|ayam|\bhen\b/,"🍗","Chicken","Fried chicken"],
+  [/rojak/,"🥗","Rojak","Rojak"],
+  [/thunder ?tea|lei cha|lui cha|salad|vegetarian|superfood|whole earth|harvest/,"🥗","Vegetarian & salads","Thunder tea rice"],
+  [/fish|seafood|kelong|shrimp|prawn|marui|tins/,"🦐","Seafood","Singaporean seafood"],
+  [/rice bowl|donburi|overrice|\brice\b/,"🍚","Rice bowls","Donburi"],
+  [/\btea\b|tea house|tea chapter/,"🍵","Tea house","Chinese tea"],
+  [/caf[eé]|coffee|kopi/,"☕","Café","Coffee"],
+];
+// Cuisine-level fallback when the stall name doesn't say what it serves.
+const CUISINE_ICON={Japanese:["🍱","Japanese","Japanese cuisine"],Korean:["🥘","Korean","Korean cuisine"],Thai:["🌶️","Thai","Thai cuisine"],
+  Dessert:["🍰","Dessert","Cake"],Cafe:["☕","Café","Coffee"],Mexican:["🌮","Mexican","Taco"],Italian:["🍝","Pasta","Pasta"],
+  Indian:["🍛","Indian","Indian cuisine"],Filipino:["🐖","Filipino","Filipino cuisine"],Vietnamese:["🍜","Vietnamese","Pho"],
+  Taiwanese:["🍜","Taiwanese","Taiwanese beef noodle soup"],Malay:["🍛","Malay","Nasi padang"],Indonesian:["🍛","Indonesian","Nasi padang"],
+  Western:["🍟","Western","Chicken chop"]};
+function dishOf(r){const n=r.name.toLowerCase();
+  for(const [re,e,label,wiki] of DISHES)if(re.test(n))return {e,label,wiki};
+  const c=CUISINE_ICON[r.cat];if(c)return {e:c[0],label:c[1],wiki:c[2]};
+  return {e:null,label:"Other",wiki:null}}
+DATA.forEach((r,i)=>{r.id=i;r.cat=catOf(r);r.isHalal=isHalal(r);r.dish=dishOf(r)});
+// Default icon: the logo file next to this page (logo.png). Until it exists, a plate emoji stands in.
+const LOGO="logo.png";let logoOk=false;
+{const im=new Image();im.onload=()=>{logoOk=true;const h=document.getElementById("logo");h.src=LOGO;h.hidden=false;render()};im.src=LOGO;}
+const icon=(r,cls="fi")=>`<span class="${cls}" style="--ring:var(${SVAR[r.season]})">${r.dish.e?r.dish.e:logoOk?`<img src="${LOGO}" alt="">`:"🍽️"}</span>`;
+const dishTag=r=>r.dish.e&&r.dish.label!==r.cat?esc(r.dish.label)+" · ":"";
+const ytId=u=>(String(u).match(/(?:youtu\.be\/|[?&]v=|shorts\/)([\w-]{11})/)||[])[1];
+// A representative photo of the dish type from Wikipedia (free, no key). Cached per search term.
+const wikiCache=new Map();
+function wikiImg(term){
+  if(!wikiCache.has(term))wikiCache.set(term,fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&prop=pageimages%7Cinfo&inprop=url&piprop=thumbnail&pithumbsize=640&gsrsearch="+encodeURIComponent(term))
+    .then(r=>r.json()).then(j=>{const p=j.query&&Object.values(j.query.pages)[0];return p&&p.thumbnail?{src:p.thumbnail.source,url:p.fullurl}:null}).catch(()=>null));
+  return wikiCache.get(term)}
 
-const state={q:"",seasons:new Set(),halal:false,cat:"",me:null,meLabel:"",rad:1,sel:null};
+const state={q:"",seasons:new Set(),halal:false,cat:"",dish:"",me:null,meLabel:"",rad:1,sel:null};
 try{const s=JSON.parse(localStorage.getItem("getfed-filters")||"{}");if(s.rad!=null)state.rad=s.rad;if(s.halal)state.halal=true}catch(e){}
 
 // ---- map
@@ -934,11 +1050,11 @@ new MutationObserver(reTheme).observe(document.documentElement,{attributes:true,
 const cluster=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:42,disableClusteringAtZoom:16,spiderfyOnMaxZoom:true});
 map.addLayer(cluster);
 const markers=new Map();
-function pinIcon(r,sel){return L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,24],tooltipAnchor:[0,-24],
-  html:`<div class="pin${sel?" sel":""}" style="background:var(${SVAR[r.season]})"></div>`})}
+function pinIcon(r,sel){return L.divIcon({className:"",iconSize:[34,42],iconAnchor:[17,42],tooltipAnchor:[0,-42],
+  html:`<div class="mk${sel?" sel":""}" style="--ring:var(${SVAR[r.season]})">${icon(r)}</div>`})}
 DATA.forEach(r=>{if(r.lat==null)return;
-  const m=L.marker([r.lat,r.lng],{icon:pinIcon(r),title:r.name,keyboard:true});
-  m.bindTooltip(`<b>${esc(r.name)}</b>${esc(r.cat)}${r.isHalal?" · Halal":""}<br><span style="opacity:.7">${esc(r.season)}</span>`,{direction:"top",offset:[0,0]});
+  const m=L.marker([r.lat,r.lng],{icon:pinIcon(r),title:r.name,keyboard:true,riseOnHover:true});
+  m.bindTooltip(`<b>${esc(r.name)}</b>${dishTag(r)}${esc(r.cat)}${r.isHalal?" · Halal":""}<br><span style="opacity:.7">${esc(r.season)}</span>`,{direction:"top",offset:[0,0]});
   m.on("click",()=>select(r.id,false));
   markers.set(r.id,m);});
 
@@ -980,6 +1096,10 @@ SEASONS.forEach(s=>{const b=document.createElement("button");b.type="button";b.c
 const cats=[...new Set(DATA.map(r=>r.cat))].sort();
 const catSel=document.getElementById("cat");catSel.innerHTML=`<option value="">All cuisines</option>`+cats.map(c=>`<option>${esc(c)}</option>`).join("");
 catSel.onchange=()=>{state.cat=catSel.value;render()};
+const dishes=[...new Set(DATA.map(r=>r.dish.label))].filter(x=>x!=="Other").sort();
+const dishSel=document.getElementById("dish");
+dishSel.innerHTML=`<option value="">All dishes</option>`+dishes.map(d=>`<option>${esc(d)}</option>`).join("")+`<option>Other</option>`;
+dishSel.onchange=()=>{state.dish=dishSel.value;render()};
 const hb=document.getElementById("halal");hb.setAttribute("aria-pressed",state.halal);
 hb.onclick=()=>{state.halal=!state.halal;hb.setAttribute("aria-pressed",state.halal);save();render()};
 let qt;document.getElementById("q").oninput=e=>{clearTimeout(qt);qt=setTimeout(()=>{state.q=e.target.value.trim().toLowerCase();render()},120)};
@@ -993,7 +1113,8 @@ function matches(r){
   if(state.seasons.size&&!state.seasons.has(r.season))return false;
   if(state.halal&&!r.isHalal)return false;
   if(state.cat&&r.cat!==state.cat)return false;
-  if(state.q){const h=(r.name+" "+r.address+" "+r.episode+" "+r.category).toLowerCase();if(!h.includes(state.q))return false}
+  if(state.dish&&r.dish.label!==state.dish)return false;
+  if(state.q){const h=(r.name+" "+r.address+" "+r.episode+" "+r.category+" "+r.dish.label).toLowerCase();if(!h.includes(state.q))return false}
   return true}
 
 function render(){
@@ -1012,9 +1133,9 @@ function render(){
   document.getElementById("count").textContent=`${mapped.length} of ${DATA.filter(r=>r.lat!=null).length} on map`;
   const L_=document.getElementById("list");
   const items=rows.slice(0,300).map(r=>`<button class="item${state.sel===r.id?" on":""}" data-id="${r.id}" type="button">
-    <span class="dot" style="background:var(${SVAR[r.season]})"></span>
+    ${icon(r)}
     <span style="min-width:0"><div class="nm">${esc(r.name)}${r.isHalal?'<span class="tag halal">Halal</span>':""}</div>
-    <div class="sub">${esc(r.cat)} · ${esc(r.season)} · ${esc(shortAddr(r.address))}</div></span>
+    <div class="sub">${dishTag(r)}${esc(r.cat)} · ${esc(r.season)} · ${esc(shortAddr(r.address))}</div></span>
     <span class="dist">${state.me?fmtD(r._d):""}</span></button>`).join("");
   const dl=vis.filter(r=>r.lat==null);
   L_.innerHTML=`<div class="listhead">${esc(head)}</div>`+(items||`<div class="empty">No spots match these filters. Clear the search or pick another season.</div>`)+
@@ -1028,11 +1149,14 @@ function linkify(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" 
 
 function select(id,fly){
   state.sel=id;const r=DATA[id];const d=document.getElementById("detail");
-  const gq=encodeURIComponent(r.name+" "+r.address);
+  const gq=encodeURIComponent(r.name+" "+r.address),yt=ytId(r.video);
+  const gimg="https://www.google.com/search?udm=2&q="+encodeURIComponent(r.name+" "+(r.country||shortAddr(r.address)||"Singapore")+" food");
   const dist=state.me&&r.lat!=null?`<dt>Distance</dt><dd>${fmtD(km(state.me,r))}${walk(km(state.me,r))} from ${esc(state.meLabel)}</dd>`:"";
   d.innerHTML=`<button class="close" type="button" aria-label="Close details">×</button>
     <div class="ep"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:var(${SVAR[r.season]})"></span>${esc(r.season)}${r.episode?" · "+esc(r.episode):""}</div>
     <h2>${esc(r.name)}</h2>
+    <div class="dishline">${icon(r)}${r.dish.e?esc(r.dish.label):esc(r.cat)}</div>
+    <div class="photos">${yt?`<a class="ph" href="${esc(r.video)}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${yt}/hqdefault.jpg" alt="Episode thumbnail" loading="lazy" onerror="this.parentNode.remove()"><span class="play" aria-hidden="true">▶</span><span class="cap">Watch the episode</span></a>`:""}${r.dish.wiki?`<figure class="ph" id="dishph" hidden><img alt="${esc(r.dish.label)}"><figcaption class="cap"></figcaption></figure>`:""}</div>
     <dl class="kv">
       <dt>Cuisine</dt><dd>${esc(r.cat)}</dd>
       <dt>Halal</dt><dd>${r.isHalal?(/OWNED/.test(r.halal)?"Muslim-owned":/FRIENDLY/.test(r.halal)?"Muslim-friendly":"Yes"):"No"}</dd>
@@ -1045,10 +1169,14 @@ function select(id,fly){
     <div class="links">
       ${r.lat!=null?`<a class="primary" href="https://www.google.com/maps/dir/?api=1&destination=${gq}" target="_blank" rel="noopener">Directions</a>`:""}
       <a href="https://www.google.com/maps/search/?api=1&query=${gq}" target="_blank" rel="noopener">Google Maps</a>
+      <a href="${gimg}" target="_blank" rel="noopener">Food photos (Google)</a>
       ${r.video?`<a href="${esc(r.video)}" target="_blank" rel="noopener">Watch episode</a>`:""}
       ${/^https?:/.test(r.ig)?`<a href="${esc(r.ig)}" target="_blank" rel="noopener">Instagram</a>`:""}
     </div>
     ${r.geo==="approx"?`<div class="note">Pin placed from the area or nearest postal code, so it may be off by a block or two.</div>`:""}`;
+  if(r.dish.wiki)wikiImg(r.dish.wiki).then(x=>{const f=document.getElementById("dishph");
+    if(!x||!f||state.sel!==id)return;const im=f.querySelector("img");im.onerror=()=>f.remove();im.src=x.src;
+    f.querySelector("figcaption").innerHTML=`What ${esc(r.dish.label.toLowerCase())} looks like · <a href="${esc(x.url)}" target="_blank" rel="noopener">Wikipedia</a>`;f.hidden=false});
   d.hidden=false;d.querySelector(".close").onclick=()=>{d.hidden=true;state.sel=null;render()};
   render();
   const m=markers.get(id);
