@@ -779,6 +779,7 @@ h1{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01
   .detail{top:auto;bottom:12px;left:max(12px,env(safe-area-inset-left,0px));max-height:70%}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
 </style>
 
 <div class="app">
@@ -919,7 +920,8 @@ AREAS.features.forEach(f=>{const c=L.geoJSON(f).getBounds().getCenter();
 const dark=()=>matchMedia("(prefers-color-scheme: dark)").matches&&document.documentElement.dataset.theme!=="light"||document.documentElement.dataset.theme==="dark";
 let tiles,tilesOk=false;
 function addTiles(){tiles&&tiles.remove();
-  tiles=L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark()?"dark_all":"rastertiles/voyager"}/{z}/{x}/{y}{r}.png`,{subdomains:"abcd",maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'});
+  // OpenStreetMap's standard tiles: free, no API key; dark mode tints them with a CSS filter.
+  tiles=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,className:dark()?"tiles-dark":"",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'});
   tiles.on("tileload",()=>{if(!tilesOk){tilesOk=true;labelLayer.remove()}});
   tiles.addTo(map);}
 addTiles();
