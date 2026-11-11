@@ -715,6 +715,16 @@ button,input,select{font:inherit;color:inherit}
 .app{position:relative;height:100%;display:grid;grid-template-columns:1fr 380px}
 #map{height:100%;width:100%;background:var(--water)}
 .leaflet-container{font-family:var(--body);background:var(--water)}
+#map{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.hold-ring{position:absolute;z-index:800;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;border:4px solid var(--brand);background:color-mix(in srgb,var(--brand) 25%,transparent);pointer-events:none;opacity:0;animation:hold .45s .15s linear forwards}
+@keyframes hold{from{transform:scale(.25);opacity:.2}to{transform:scale(1);opacity:1}}
+.basectl{position:relative;border:0!important;box-shadow:0 1px 5px rgba(0,0,0,.35)!important}
+.basebtn{width:34px;height:34px;display:grid;place-items:center;background:var(--surface);color:var(--ink);border:0;border-radius:4px;cursor:pointer}
+.basemenu{position:absolute;right:calc(100% + 8px);top:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:flex;flex-direction:column;gap:2px;width:max-content;max-width:calc(100vw - 80px)}
+.basemenu[hidden]{display:none}
+.basemenu button{text-align:left;padding:9px 10px;border:0;background:none;border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink)}
+.basemenu button:hover{background:var(--bg)}
+.basemenu button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);font-weight:600}
 .leaflet-tile-pane{opacity:1}
 .panel{background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
 .head{padding:14px 16px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
@@ -846,7 +856,7 @@ h1{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01
           <select id="rad"><option value="0.5">500 m</option><option value="1" selected>1 km</option><option value="2">2 km</option><option value="5">5 km</option><option value="0">Any</option></select>
         </span>
       </div>
-      <div class="locmsg" id="locmsg">Tap <b>Find me</b> to see spots around you. You can also tap anywhere on the map to set your spot.</div>
+      <div class="locmsg" id="locmsg">Tap <b>Find me</b> to see spots around you. Or <b>press and hold</b> anywhere on the map to drop your spot.</div>
     </div>
     <div class="list" id="list"></div>
   </aside>
@@ -1038,15 +1048,45 @@ AREAS.features.forEach(f=>{const c=L.geoJSON(f).getBounds().getCenter();
   labelLayer.addLayer(L.tooltip({permanent:true,direction:"center",className:"area-label",pane:"labels",interactive:false}).setLatLng(c).setContent(esc(f.properties.name)));});
 // Street tiles where the viewer allows them; the drawn basemap stays underneath if they are blocked.
 const dark=()=>matchMedia("(prefers-color-scheme: dark)").matches&&document.documentElement.dataset.theme!=="light"||document.documentElement.dataset.theme==="dark";
+// Map backgrounds: all free and keyless. "tint" ones are darkened with a CSS filter in dark mode.
+const OSM='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+const SG_BOUNDS=[[1.13,103.55],[1.5,104.15]];
+const BASEMAPS={
+  streets:{name:"Streets",url:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",tint:true,attr:OSM},
+  colourful:{name:"Colourful",url:"https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",tint:true,attr:OSM+', style by <a href="https://www.hotosm.org/" target="_blank" rel="noopener">HOT</a>'},
+  onemap:{name:"OneMap (Singapore only)",url:()=>`https://www.onemap.gov.sg/maps/tiles/${dark()?"Night":"Default"}/{z}/{x}/{y}.png`,min:11,bounds:SG_BOUNDS,
+    attr:'<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">OneMap</a> &copy; contributors | <a href="https://www.sla.gov.sg/" target="_blank" rel="noopener">Singapore Land Authority</a>'},
+  satellite:{name:"Satellite",url:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",native:18,
+    attr:'Imagery &copy; Esri, Maxar, Earthstar Geographics'},
+  plain:{name:"Plain (fastest)",url:null},
+};
+let base="streets";try{const b=localStorage.getItem("getfed-base");if(BASEMAPS[b])base=b}catch(e){}
 let tiles,tilesOk=false;
-function addTiles(){tiles&&tiles.remove();
-  // OpenStreetMap's standard tiles: free, no API key; dark mode tints them with a CSS filter.
-  tiles=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,className:dark()?"tiles-dark":"",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'});
-  tiles.on("tileload",()=>{if(!tilesOk){tilesOk=true;labelLayer.remove()}});
-  tiles.addTo(map);}
-addTiles();
+function addTiles(){tiles&&tiles.remove();tiles=null;tilesOk=false;
+  const b=BASEMAPS[base];
+  if(b.url){
+    tiles=L.tileLayer(typeof b.url==="function"?b.url():b.url,{subdomains:"abc",maxZoom:19,maxNativeZoom:b.native||19,minZoom:b.min||0,bounds:b.bounds,
+      className:b.tint&&dark()?"tiles-dark":"",attribution:b.attr});
+    tiles.on("tileload",()=>{if(!tilesOk){tilesOk=true;labelLayer.remove()}});
+    tiles.addTo(map);}
+  syncLabels();}
+// Area names on the drawn map, only while no street tiles are showing.
 function syncLabels(){if(tilesOk)return;map.getZoom()>=12&&map.getZoom()<=14?labelLayer.addTo(map):labelLayer.remove()}
-map.on("zoomend",syncLabels);syncLabels();
+addTiles();
+map.on("zoomend",syncLabels);
+const BaseCtl=L.Control.extend({options:{position:"topright"},onAdd(){
+  const d=L.DomUtil.create("div","leaflet-bar basectl");
+  d.innerHTML=`<button type="button" class="basebtn" title="Map style" aria-label="Map style" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="m2 13 10 5 10-5"/></svg></button>
+    <div class="basemenu" role="group" aria-label="Map style" hidden>${Object.entries(BASEMAPS).map(([k,b])=>`<button type="button" data-k="${k}" aria-pressed="${k===base}">${b.name}</button>`).join("")}</div>`;
+  L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
+  const btn=d.querySelector(".basebtn"),menu=d.querySelector(".basemenu");
+  const show=v=>{menu.hidden=!v;btn.setAttribute("aria-expanded",v)};
+  btn.onclick=()=>show(menu.hidden);
+  map.on("click movestart",()=>show(false));
+  menu.querySelectorAll("[data-k]").forEach(o=>o.onclick=()=>{base=o.dataset.k;try{localStorage.setItem("getfed-base",base)}catch(e){}
+    menu.querySelectorAll("[data-k]").forEach(x=>x.setAttribute("aria-pressed",x===o));addTiles();show(false)});
+  return d}});
+new BaseCtl().addTo(map);
 const reTheme=()=>{drawBase();addTiles();render()};
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",reTheme);
 new MutationObserver(reTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
@@ -1079,13 +1119,28 @@ const walk=d=>d<=2.5?` · ${Math.max(1,Math.round(d*1000/80))} min walk`:"";
 
 document.getElementById("locate").onclick=()=>{
   const msg=document.getElementById("locmsg");
-  if(!navigator.geolocation){msg.innerHTML="This browser can't share your location. Pick your MRT station or tap the map instead.";return}
+  if(!navigator.geolocation){msg.innerHTML="This browser can't share your location. Pick your MRT station, or press and hold on the map where you are.";return}
   msg.textContent="Finding you…";
   navigator.geolocation.getCurrentPosition(p=>{setMe(p.coords.latitude,p.coords.longitude,`your location (±${Math.round(p.coords.accuracy)} m)`)},
-    e=>{msg.innerHTML=(e.code===1?"Location access is blocked in this view. ":"Couldn't get a GPS fix. ")+"Pick your <b>MRT station</b> or <b>tap the map</b> where you are and the list will sort by distance.";},
+    e=>{msg.innerHTML=(e.code===1?"Location access is blocked in this view. ":"Couldn't get a GPS fix. ")+"Pick your <b>MRT station</b> or <b>press and hold on the map</b> where you are and the list will sort by distance.";},
     {enableHighAccuracy:true,timeout:12000,maximumAge:60000});
 };
-map.on("click",e=>{setMe(e.latlng.lat,e.latlng.lng,"the spot you tapped",false)});
+// Press and hold on the map (or right-click) to drop your spot. A plain tap does nothing, so panning around never moves it.
+{const el=map.getContainer();let t=null,start=null,ring=null;
+  const cancel=()=>{clearTimeout(t);t=null;ring&&ring.remove();ring=null};
+  const drop=ll=>{cancel();navigator.vibrate?.(25);setMe(ll.lat,ll.lng,"the spot you picked",false)};
+  el.addEventListener("pointerdown",e=>{
+    if(t){cancel();return}  // a second finger means pinch-zoom
+    if(e.pointerType==="mouse"&&e.button!==0)return;
+    if(e.target.closest(".leaflet-control,.leaflet-marker-icon,.detail"))return;
+    const r=el.getBoundingClientRect(),pt=L.point(e.clientX-r.left,e.clientY-r.top);start=pt;
+    ring=document.createElement("div");ring.className="hold-ring";ring.style.left=pt.x+"px";ring.style.top=pt.y+"px";el.appendChild(ring);
+    t=setTimeout(()=>drop(map.containerPointToLatLng(pt)),600);});
+  el.addEventListener("pointermove",e=>{if(!t)return;const r=el.getBoundingClientRect();
+    if(Math.hypot(e.clientX-r.left-start.x,e.clientY-r.top-start.y)>10)cancel()});
+  ["pointerup","pointercancel"].forEach(n=>el.addEventListener(n,cancel));
+  map.on("dragstart zoomstart",cancel);
+  map.on("contextmenu",e=>drop(e.latlng));}
 const mrtSel=document.getElementById("mrt");
 MRT.forEach(([n,la,lo],i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;mrtSel.appendChild(o)});
 mrtSel.onchange=()=>{if(mrtSel.value==="")return;const [n,la,lo]=MRT[+mrtSel.value];setMe(la,lo,`${n} station`)};
@@ -1132,7 +1187,7 @@ function render(){
     head=state.rad>0?`${near.length} within ${fmtD(state.rad)} of ${state.meLabel}`:`Nearest to ${state.meLabel}`;
     rows=near.length?near:rows.slice(0,15);
     if(!near.length&&state.rad>0)head=`Nothing within ${fmtD(state.rad)} — here are the 15 closest to ${state.meLabel}`;
-    document.getElementById("locmsg").innerHTML=`Showing spots near <b>${esc(state.meLabel)}</b>. Tap the map to move your spot.`;
+    document.getElementById("locmsg").innerHTML=`Showing spots near <b>${esc(state.meLabel)}</b>. Press and hold the map to move your spot.`;
   }else{rows=mapped.slice().sort((a,b)=>SEASONS.indexOf(a.season)-SEASONS.indexOf(b.season));head=`${mapped.length} spots, newest season first`}
   document.getElementById("count").textContent=`${mapped.length} of ${DATA.filter(r=>r.lat!=null).length} on map`;
   const L_=document.getElementById("list");
