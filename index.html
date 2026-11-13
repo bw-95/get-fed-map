@@ -775,6 +775,13 @@ h1{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01
 .mk:after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--ring)}
 .mk.sel{transform:scale(1.3);z-index:1}
 .mk.sel .fi{box-shadow:0 0 0 3px var(--brand),0 3px 10px rgba(0,0,0,.35)}
+.mk.stack{isolation:isolate;cursor:pointer}
+.mk .fi.back{position:absolute;top:-4px;left:7px;z-index:-1;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.mk.sel .fi.back{box-shadow:none}
+.mk .cnt{position:absolute;top:-8px;right:-10px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--brand-dark);color:var(--brand);font:800 11px/20px var(--body);text-align:center;box-shadow:0 0 0 2px var(--surface)}
+.stacklist{display:flex;flex-direction:column;margin:0 -16px -16px;border-top:1px solid var(--line)}
+.stacklist .item:last-child{border-bottom:0}
+.detail .back{align-self:flex-start;border:0;background:var(--bg);color:var(--ink);font-weight:600;font-size:12.5px;padding:6px 10px;border-radius:999px;cursor:pointer;margin:-4px 0 -4px}
 .you{width:18px;height:18px;border-radius:50%;background:var(--you);border:3px solid #fff;box-shadow:0 0 0 6px color-mix(in srgb,var(--you) 30%,transparent)}
 .marker-cluster{background:color-mix(in srgb,var(--brand) 40%,transparent)!important}
 .marker-cluster div{background:var(--brand)!important;color:var(--brand-ink)!important;font-weight:800;font-family:var(--body);box-shadow:0 0 0 2px var(--brand-dark)}
@@ -1015,6 +1022,13 @@ function dishOf(r){const n=r.name.toLowerCase();
   const c=CUISINE_ICON[r.cat];if(c)return {e:c[0],label:c[1],wiki:c[2]};
   return {e:null,label:"Other",wiki:null}}
 DATA.forEach((r,i)=>{r.id=i;r.cat=catOf(r);r.isHalal=isHalal(r);r.dish=dishOf(r)});
+// Spots within 25 m of each other (same hawker centre, mall or block) form one "place" and share one pin.
+{const par=DATA.map((_,i)=>i),f=i=>par[i]===i?i:(par[i]=f(par[i]));
+  const geo=DATA.filter(r=>r.lat!=null);
+  geo.forEach((a,i)=>{for(let j=i+1;j<geo.length;j++)if(km(a,geo[j])<.025)par[f(a.id)]=f(geo[j].id)});
+  DATA.forEach(r=>r.place=f(r.id));}
+const unitOf=r=>(r.address.match(/#\s?[\w-]+(?:\/\w+)*|\bB\d-\d+\w*/i)||[""])[0];
+const placeName=r=>shortAddr(r.address).replace(/,?\s*(#|\bB\d-\d).*$/i,"")||r.name;
 // Default icon: the logo file next to this page (logo.png). Until it exists, a plate emoji stands in.
 const LOGO="logo.png";let logoOk=false;
 {const im=new Image();im.onload=()=>{logoOk=true;const h=document.getElementById("logo");h.src=LOGO;h.hidden=false;render()};im.src=LOGO;}
@@ -1028,7 +1042,7 @@ function wikiImg(term){
     .then(r=>r.json()).then(j=>{const p=j.query&&Object.values(j.query.pages)[0];return p&&p.thumbnail?{src:p.thumbnail.source,url:p.fullurl}:null}).catch(()=>null));
   return wikiCache.get(term)}
 
-const state={q:"",seasons:new Set(),halal:false,cat:"",dish:"",me:null,meLabel:"",rad:1,sel:null};
+const state={q:"",seasons:new Set(),halal:false,cat:"",dish:"",stack:null,me:null,meLabel:"",rad:1,sel:null};
 try{const s=JSON.parse(localStorage.getItem("getfed-filters")||"{}");if(s.rad!=null)state.rad=s.rad;if(s.halal)state.halal=true}catch(e){}
 
 // ---- map
@@ -1091,13 +1105,28 @@ const reTheme=()=>{drawBase();addTiles();render()};
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",reTheme);
 new MutationObserver(reTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 
-const cluster=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:42,disableClusteringAtZoom:16,spiderfyOnMaxZoom:true});
+const idsOf=c=>c.getAllChildMarkers().map(m=>m.options.spotId);
+const isStack=ids=>ids.every(i=>DATA[i].place===DATA[ids[0]].place);
+function topOf(ids){return ids.includes(state.sel)?DATA[state.sel]:ids.map(i=>DATA[i]).sort((a,b)=>SEASONS.indexOf(a.season)-SEASONS.indexOf(b.season))[0]}
+const cluster=L.markerClusterGroup({showCoverageOnHover:false,spiderfyOnMaxZoom:false,zoomToBoundsOnClick:false,
+  // Close-up, only pins that would actually overlap get grouped.
+  maxClusterRadius:z=>z>=16?26:42,
+  iconCreateFunction(c){const ids=idsOf(c),n=ids.length;
+    if(!isStack(ids))return L.divIcon({className:"marker-cluster",iconSize:[40,40],html:`<div><span>${n}</span></div>`});
+    const top=topOf(ids),sel=ids.includes(state.sel)||(state.stack&&state.stack.includes(ids[0]));
+    return L.divIcon({className:"",iconSize:[34,42],iconAnchor:[17,42],tooltipAnchor:[0,-42],
+      html:`<div class="mk stack${sel?" sel":""}" style="--ring:var(${SVAR[top.season]})"><span class="fi back"></span>${icon(top)}<span class="cnt">${n}</span></div>`})}});
+cluster.on("clusterclick",e=>{e.layer.closeTooltip();const ids=idsOf(e.layer);
+  if(isStack(ids)||map.getZoom()>=map.getMaxZoom())openStack(ids);else e.layer.zoomToBounds({padding:[48,48]})});
+cluster.on("clustermouseover",e=>{const ids=idsOf(e.layer);if(!isStack(ids))return;
+  e.layer.bindTooltip(`<b>${ids.length} spots here</b>${ids.slice(0,4).map(i=>esc(DATA[i].name)).join("<br>")}${ids.length>4?"<br>…":""}`,{direction:"top"}).openTooltip()});
+cluster.on("clustermouseout",e=>e.layer.closeTooltip());
 map.addLayer(cluster);
 const markers=new Map();
 function pinIcon(r,sel){return L.divIcon({className:"",iconSize:[34,42],iconAnchor:[17,42],tooltipAnchor:[0,-42],
   html:`<div class="mk${sel?" sel":""}" style="--ring:var(${SVAR[r.season]})">${icon(r)}</div>`})}
 DATA.forEach(r=>{if(r.lat==null)return;
-  const m=L.marker([r.lat,r.lng],{icon:pinIcon(r),title:r.name,keyboard:true,riseOnHover:true});
+  const m=L.marker([r.lat,r.lng],{icon:pinIcon(r),title:r.name,keyboard:true,riseOnHover:true,spotId:r.id});
   m.bindTooltip(`<b>${esc(r.name)}</b>${dishTag(r)}${esc(r.cat)}${r.isHalal?" · Halal":""}<br><span style="opacity:.7">${esc(r.season)}</span>`,{direction:"top",offset:[0,0]});
   m.on("click",()=>select(r.id,false));
   markers.set(r.id,m);});
@@ -1107,7 +1136,7 @@ let meMarker,meCircle;
 function setMe(lat,lng,label,fly=true){
   state.me={lat,lng};state.meLabel=label;
   meMarker&&meMarker.remove();meCircle&&meCircle.remove();
-  meMarker=L.marker([lat,lng],{icon:L.divIcon({className:"",html:'<div class="you"></div>',iconSize:[18,18],iconAnchor:[9,9]}),zIndexOffset:1000,interactive:false}).addTo(map);
+  meMarker=L.marker([lat,lng],{icon:L.divIcon({className:"",html:'<div class="you"></div>',iconSize:[18,18],iconAnchor:[9,9]}),zIndexOffset:-5000,interactive:false}).addTo(map);
   if(state.rad>0)meCircle=L.circle([lat,lng],{radius:state.rad*1000,color:css("--you"),weight:1.5,fillOpacity:.06,interactive:false}).addTo(map);
   if(fly){state.rad>0?map.flyToBounds(L.latLng(lat,lng).toBounds(state.rad*2000),{duration:.6}):map.flyTo([lat,lng],14,{duration:.6})}
   render();
@@ -1179,7 +1208,7 @@ function matches(r){
 function render(){
   const vis=DATA.filter(matches);
   cluster.clearLayers();
-  const ms=[];vis.forEach(r=>{const m=markers.get(r.id);if(m){m.setIcon(pinIcon(r,state.sel===r.id));ms.push(m)}});cluster.addLayers(ms);
+  const ms=[];vis.forEach(r=>{const m=markers.get(r.id);if(m){m.setIcon(pinIcon(r,state.sel===r.id));m.setZIndexOffset(state.sel===r.id?5000:0);ms.push(m)}});cluster.addLayers(ms);
   const mapped=vis.filter(r=>r.lat!=null);
   let rows=mapped,head;
   if(state.me){mapped.forEach(r=>r._d=km(state.me,r));rows=mapped.slice().sort((a,b)=>a._d-b._d);
@@ -1206,12 +1235,30 @@ function render(){
 function shortAddr(a){return a.replace(/,?\s*Singapore\s*\d{6}.*$/i,"").replace(/,?\s*Malaysia\s*$/i,"").slice(0,70)}
 function linkify(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--accent)">$1</a>')}
 
+function closeDetail(){document.getElementById("detail").hidden=true;state.sel=null;state.stack=null;render()}
+function openStack(ids){
+  const d=document.getElementById("detail"),rs=ids.map(i=>DATA[i]).sort((a,b)=>SEASONS.indexOf(a.season)-SEASONS.indexOf(b.season)||a.name.localeCompare(b.name));
+  state.sel=null;state.stack=rs.map(r=>r.id);
+  d.innerHTML=`<button class="close" type="button" aria-label="Close">×</button>
+    <div class="ep">${rs.length} Get Fed spots at this place</div>
+    <h2>${esc(placeName(rs[0]))}</h2>
+    <div class="stacklist">${rs.map(r=>`<button class="item" data-id="${r.id}" type="button">${icon(r)}
+      <span style="min-width:0"><div class="nm">${esc(r.name)}${r.isHalal?'<span class="tag halal">Halal</span>':""}</div>
+      <div class="sub">${dishTag(r)}${esc(r.cat)} · ${esc(r.season)}</div></span>
+      <span class="dist">${esc(unitOf(r))}</span></button>`).join("")}</div>`;
+  d.querySelectorAll(".item").forEach(b=>b.onclick=()=>select(+b.dataset.id,false));
+  d.hidden=false;d.scrollTop=0;d.querySelector(".close").onclick=closeDetail;
+  render();
+}
 function select(id,fly){
   state.sel=id;const r=DATA[id];const d=document.getElementById("detail");
+  const here=DATA.filter(x=>x.place===r.place&&x.lat!=null&&matches(x)).map(x=>x.id);
+  state.stack=here.length>1?here:null;
   const gq=encodeURIComponent(r.name+" "+r.address),yt=ytId(r.video);
   const gimg="https://www.google.com/search?udm=2&q="+encodeURIComponent(r.name+" "+(r.country||shortAddr(r.address)||"Singapore")+" food");
   const dist=state.me&&r.lat!=null?`<dt>Distance</dt><dd>${fmtD(km(state.me,r))}${walk(km(state.me,r))} from ${esc(state.meLabel)}</dd>`:"";
   d.innerHTML=`<button class="close" type="button" aria-label="Close details">×</button>
+    ${state.stack?`<button class="back" type="button">← ${state.stack.length} spots here</button>`:""}
     <div class="ep"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:var(${SVAR[r.season]})"></span>${esc(r.season)}${r.episode?" · "+esc(r.episode):""}</div>
     <h2>${esc(r.name)}</h2>
     <div class="dishline">${icon(r)}${r.dish.e?esc(r.dish.label):esc(r.cat)}</div>
@@ -1236,10 +1283,13 @@ function select(id,fly){
   if(r.dish.wiki)wikiImg(r.dish.wiki).then(x=>{const f=document.getElementById("dishph");
     if(!x||!f||state.sel!==id)return;const im=f.querySelector("img");im.onerror=()=>f.remove();im.src=x.src;
     f.querySelector("figcaption").innerHTML=`What ${esc(r.dish.label.toLowerCase())} looks like · <a href="${esc(x.url)}" target="_blank" rel="noopener">Wikipedia</a>`;f.hidden=false});
-  d.hidden=false;d.querySelector(".close").onclick=()=>{d.hidden=true;state.sel=null;render()};
+  d.hidden=false;d.scrollTop=0;d.querySelector(".close").onclick=closeDetail;
+  const back=d.querySelector(".back");if(back)back.onclick=()=>openStack(state.stack);
   render();
   const m=markers.get(id);
-  if(m){if(fly)cluster.zoomToShowLayer(m,()=>{map.panTo(m.getLatLng());m.openTooltip()});}
+  // Spots that share a place can't be pulled apart by zooming, so just fly to the shared pin.
+  if(m&&fly){if(state.stack)map.flyTo(m.getLatLng(),Math.max(map.getZoom(),17),{duration:.6});
+    else cluster.zoomToShowLayer(m,()=>{map.panTo(m.getLatLng());m.openTooltip()});}
   const li=document.querySelector(`.item[data-id="${id}"]`);li&&li.scrollIntoView({block:"nearest"});
 }
 render();

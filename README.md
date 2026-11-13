@@ -4,6 +4,7 @@ Interactive map of Get Fed food spots. Open https://bw-95.github.io/get-fed-map/
 ## Using the map
 
 - **Your spot**: tap **Find me**, pick an MRT station, or **press and hold** anywhere on the map (right-click on a computer). A normal tap just pans, so your spot won't move by accident.
+- **Places with several spots**: spots in the same hawker centre, mall or block share one pin with a number on it. Tap it to pick a spot; each spot's details have a "← N spots here" button to go back.
 - **Map style**: the layers button under the zoom buttons switches between Streets, Colourful, OneMap (Singapore only), Satellite and Plain. Your choice is remembered.
 
 ## Customising
